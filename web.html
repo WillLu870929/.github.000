@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>個人網站</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #77aaff 3px solid;
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        #main {
+            padding: 30px;
+            background: #fff;
+        }
+        .section {
+            margin: 20px 0;
+        }
+        .section h2 {
+            margin: 0 0 10px;
+        }
+        .section input, .section textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+        }
+        .upload-section {
+            background: #eee;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #333;
+            color: #fff;
+            margin-top: 20px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 5px 0;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ccc;
+        }
+        .file-item button {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>個人網站</h1>
+        </div>
+    </header>
+    <div id="main" class="container">
+        <section class="section">
+            <h2>個人簡介</h2>
+            <textarea id="bio" placeholder="在此填寫個人簡介..."></textarea>
+        </section>
+        <section class="section upload-section">
+            <h2>檔案上傳/下載</h2>
+            <input type="file" id="fileUpload" accept=".pdf">
+            <div id="fileList">
+                <!-- 動態生成的檔案列表 -->
+            </div>
+        </section>
+    </div>
+    <footer>
+        <p>個人網站 © 2024</p>
+    </footer>
+
+    <script>
+        // 加載本地存儲的文件列表和個人簡介
+        window.onload = function() {
+            const fileList = JSON.parse(localStorage.getItem('fileList')) || [];
+            fileList.forEach(file => addFileItem(file.name, file.content));
+            
+            const bio = localStorage.getItem('bio') || '';
+            document.getElementById('bio').value = bio;
+        }
+
+        // 保存個人簡介到本地存儲
+        document.getElementById('bio').addEventListener('input', function() {
+            localStorage.setItem('bio', this.value);
+        });
+
+        // 處理文件上傳
+        document.getElementById('fileUpload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                addFileItem(file.name, content);
+                saveFileToLocalStorage(file.name, content);
+            }
+            reader.readAsDataURL(file);
+        });
+
+        // 添加文件項目到頁面
+        function addFileItem(fileName, fileContent) {
+            const fileList = document.getElementById('fileList');
+            
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = fileName;
+            
+            const saveButton = document.createElement('button');
+            saveButton.textContent = '保存';
+            saveButton.addEventListener('click', function() {
+                const link = document.createElement('a');
+                link.href = fileContent;
+                link.download = fileName;
+                link.click();
+            });
+            
+            const downloadButton = document.createElement('button');
+            downloadButton.textContent = '下載';
+            downloadButton.addEventListener('click', function() {
+                const link = document.createElement('a');
+                link.href = fileContent;
+                link.download = fileName;
+                link.click();
+            });
+            
+            fileItem.appendChild(nameSpan);
+            fileItem.appendChild(saveButton);
+            fileItem.appendChild(downloadButton);
+            
+            fileList.appendChild(fileItem);
+        }
+
+        // 將文件保存到本地存儲
+        function saveFileToLocalStorage(fileName, fileContent) {
+            const fileList = JSON.parse(localStorage.getItem('fileList')) || [];
+            fileList.push({name: fileName, content: fileContent});
+            localStorage.setItem('fileList', JSON.stringify(fileList));
+        }
+    </script>
+</body>
+</html>
